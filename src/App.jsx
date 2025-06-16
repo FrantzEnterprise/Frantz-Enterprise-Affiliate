@@ -1,62 +1,61 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { ThemeProvider } from 'styled-components'
 import { AuthProvider } from './context/AuthContext'
 import { ProductProvider } from './context/ProductContext'
 import { SubscriptionProvider } from './context/SubscriptionContext'
 import { ReviewProvider } from './context/ReviewContext'
-import GlobalStyle from './styles/GlobalStyle'
-import theme from './styles/theme'
-import Navbar from './components/Navbar'
+import { ClientProvider } from './context/ClientContext'
+import Header from './components/Header'
 import Footer from './components/Footer'
-import ScrollToTop from './components/ScrollToTop'
-
-// Public Pages
 import HomePage from './pages/HomePage'
-import AboutPage from './pages/AboutPage'
-import ProductsPage from './pages/ProductsPage'
-import SubscriptionsPage from './pages/SubscriptionsPage'
-import ReviewsPage from './pages/ReviewsPage'
-import ReviewDetailPage from './pages/ReviewDetailPage'
-import ContactPage from './pages/ContactPage'
-import LoginPage from './pages/LoginPage'
-import NotFoundPage from './pages/NotFoundPage'
-
-// Admin Pages
+import About from './pages/AboutPage'
+import Contact from './pages/ContactPage'
+import Products from './pages/ProductsPage'
+import Subscriptions from './pages/SubscriptionsPage'
+import Reviews from './pages/ReviewsPage'
+import Login from './pages/LoginPage'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminProducts from './pages/AdminProducts'
-import AdminSubscriptions from './pages/AdminSubscriptions'
-import AdminReviews from './pages/AdminReviews'
 import ProductForm from './pages/ProductForm'
+import AdminSubscriptions from './pages/AdminSubscriptions'
 import SubscriptionForm from './pages/SubscriptionForm'
+import AdminReviews from './pages/AdminReviews'
 import ReviewForm from './pages/ReviewForm'
+import AdminClients from './pages/AdminClients'
+import AdminClientForm from './pages/AdminClientForm'
+import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import ScrollToTop from './components/ScrollToTop'
+import './App.css'
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyle />
+    <Router>
+      <ScrollToTop />
       <AuthProvider>
         <ProductProvider>
           <SubscriptionProvider>
             <ReviewProvider>
-              <Router>
-                <ScrollToTop />
-                <Navbar />
+              <ClientProvider>
+                <Header />
                 <main>
                   <Routes>
-                    {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/subscriptions" element={<SubscriptionsPage />} />
-                    <Route path="/reviews" element={<ReviewsPage />} />
-                    <Route path="/reviews/:id" element={<ReviewDetailPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/subscriptions" element={<Subscriptions />} />
+                    <Route path="/reviews" element={<Reviews />} />
+                    <Route path="/login" element={<Login />} />
                     
-                    {/* Admin Routes */}
+                    {/* Admin routes */}
                     <Route path="/admin" element={
+                      <ProtectedRoute>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/dashboard" element={
                       <ProtectedRoute>
                         <AdminDashboard />
                       </ProtectedRoute>
@@ -116,17 +115,34 @@ function App() {
                       </ProtectedRoute>
                     } />
                     
-                    {/* 404 Route */}
+                    <Route path="/admin/clients" element={
+                      <ProtectedRoute>
+                        <AdminClients />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/clients/add" element={
+                      <ProtectedRoute>
+                        <AdminClientForm />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/clients/edit/:id" element={
+                      <ProtectedRoute>
+                        <AdminClientForm />
+                      </ProtectedRoute>
+                    } />
+                    
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </main>
                 <Footer />
-              </Router>
+              </ClientProvider>
             </ReviewProvider>
           </SubscriptionProvider>
         </ProductProvider>
       </AuthProvider>
-    </ThemeProvider>
+    </Router>
   )
 }
 

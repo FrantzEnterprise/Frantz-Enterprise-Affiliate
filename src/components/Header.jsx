@@ -168,16 +168,18 @@ const Header = () => {
             </CloseButton>
             <NavLink to="/" onClick={closeMenu}>Home</NavLink>
             <NavLink to="/products" onClick={closeMenu}>Products</NavLink>
+            <NavLink to="/subscriptions" onClick={closeMenu}>Subscriptions</NavLink>
+            <NavLink to="/reviews" onClick={closeMenu}>Reviews</NavLink>
             <NavLink to="/about" onClick={closeMenu}>About</NavLink>
             <NavLink to="/contact" onClick={closeMenu}>Contact</NavLink>
             
             {isAuthenticated ? (
-              <AdminButton to="/admin/dashboard" onClick={closeMenu}>
+              <AdminButton to="/admin" onClick={closeMenu}>
                 <FaUser />
                 Dashboard
               </AdminButton>
             ) : (
-              <AdminButton to="/admin" onClick={closeMenu}>
+              <AdminButton to="/login" onClick={closeMenu}>
                 <FaUser />
                 Admin Login
               </AdminButton>

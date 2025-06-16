@@ -1,37 +1,37 @@
-import React, { useState, useContext } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import styled from 'styled-components'
-import { FaUser, FaLock, FaSignInAlt } from 'react-icons/fa'
+import { FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
 const LoginContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 200px);
+  min-height: calc(100vh - 300px);
   padding: 2rem 0;
 `
 
 const LoginCard = styled(motion.div)`
   background-color: var(--surface);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   width: 100%;
   max-width: 450px;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 `
 
 const LoginHeader = styled.div`
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   padding: 2rem;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
   text-align: center;
 `
 
 const LoginTitle = styled.h2`
   font-size: 1.75rem;
-  color: white;
   margin-bottom: 0.5rem;
+  color: white;
 `
 
 const LoginSubtitle = styled.p`
@@ -47,21 +47,13 @@ const FormGroup = styled.div`
   position: relative;
 `
 
-const Label = styled.label`
+const FormLabel = styled.label`
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--text);
 `
 
-const InputIcon = styled.div`
-  position: absolute;
-  left: 1rem;
-  top: 2.75rem;
-  color: var(--text-secondary);
-`
-
-const Input = styled.input`
+const FormInput = styled.input`
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   border-radius: 0.375rem;
@@ -77,22 +69,27 @@ const Input = styled.input`
   }
 `
 
+const InputIcon = styled.div`
+  position: absolute;
+  left: 0.75rem;
+  top: 2.4rem;
+  color: var(--text-secondary);
+`
+
 const LoginButton = styled.button`
   width: 100%;
-  padding: 0.75rem 1.25rem;
+  padding: 0.875rem;
   background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-  border: none;
   border-radius: 0.375rem;
   color: white;
   font-weight: 500;
-  cursor: pointer;
   transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  margin-top: 1rem;
   
   &:hover {
+    opacity: 0.9;
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
   }
@@ -108,18 +105,32 @@ const LoginButton = styled.button`
 const ErrorMessage = styled.div`
   background-color: rgba(239, 68, 68, 0.1);
   color: var(--error);
-  padding: 0.75rem 1rem;
+  padding: 0.75rem;
   border-radius: 0.375rem;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
 `
 
 const LoginInfo = styled.div`
+  background-color: rgba(99, 102, 241, 0.1);
+  border-radius: 0.375rem;
+  padding: 1rem;
   margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--surface-light);
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  
+  h4 {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+  }
+  
+  p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+  }
 `
 
 const LoginPage = () => {
@@ -127,35 +138,31 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   
-  // If already authenticated, redirect to admin dashboard
-  if (isAuthenticated) {
-    return <Navigate to="/admin" replace />
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin')
+    }
+  }, [isAuthenticated, navigate])
   
   const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
-    
-    if (!username.trim() || !password.trim()) {
-      setError('Please enter both username and password')
-      return
-    }
-    
     setIsLoading(true)
     
-    // Simulate API call delay
     setTimeout(() => {
       const success = login(username, password)
       
       if (success) {
         navigate('/admin')
       } else {
-        setError('Invalid username or password')
-        setIsLoading(false)
+        setError('Invalid username or password. Please try again.')
       }
+      
+      setIsLoading(false)
     }, 1000)
   }
   
@@ -168,54 +175,52 @@ const LoginPage = () => {
       >
         <LoginHeader>
           <LoginTitle>Admin Login</LoginTitle>
-          <LoginSubtitle>Sign in to access the admin dashboard</LoginSubtitle>
+          <LoginSubtitle>Sign in to access your dashboard</LoginSubtitle>
         </LoginHeader>
         
         <LoginForm onSubmit={handleSubmit}>
-          {error && <ErrorMessage>{error}</ErrorMessage>}
+          {error && (
+            <ErrorMessage>
+              <FaExclamationTriangle /> {error}
+            </ErrorMessage>
+          )}
           
           <FormGroup>
-            <Label htmlFor="username">Username</Label>
+            <FormLabel htmlFor="username">Username</FormLabel>
             <InputIcon>
               <FaUser />
             </InputIcon>
-            <Input
-              type="text"
-              id="username"
+            <FormInput 
+              type="text" 
+              id="username" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              disabled={isLoading}
+              required 
             />
           </FormGroup>
           
           <FormGroup>
-            <Label htmlFor="password">Password</Label>
+            <FormLabel htmlFor="password">Password</FormLabel>
             <InputIcon>
               <FaLock />
             </InputIcon>
-            <Input
-              type="password"
-              id="password"
+            <FormInput 
+              type="password" 
+              id="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              disabled={isLoading}
+              required 
             />
           </FormGroup>
           
           <LoginButton type="submit" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : (
-              <>
-                <FaSignInAlt /> Sign In
-              </>
-            )}
+            {isLoading ? 'Signing in...' : 'Sign In'}
           </LoginButton>
           
           <LoginInfo>
-            <p>For demo purposes, use:</p>
-            <p>Username: <strong>admin</strong></p>
-            <p>Password: <strong>password</strong></p>
+            <h4>Demo Credentials</h4>
+            <p><strong>Username:</strong> admin</p>
+            <p><strong>Password:</strong> password</p>
           </LoginInfo>
         </LoginForm>
       </LoginCard>

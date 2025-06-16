@@ -402,7 +402,7 @@ const AdminReviews = () => {
   }
   
   return (
-    <div>
+    <div className="container">
       <BackLink to="/admin">
         <FaArrowLeft /> Back to Admin Dashboard
       </BackLink>

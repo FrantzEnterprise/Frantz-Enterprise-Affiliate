@@ -6,6 +6,7 @@ import { FaBox, FaReceipt, FaStar, FaEdit, FaChartLine, FaUsers, FaEnvelope } fr
 import { useProduct } from '../context/ProductContext'
 import { useSubscription } from '../context/SubscriptionContext'
 import { useReview } from '../context/ReviewContext'
+import { useClient } from '../context/ClientContext'
 
 const DashboardContainer = styled.div`
   padding: 3rem 0;
@@ -81,6 +82,11 @@ const StatIcon = styled.div`
     background-color: rgba(236, 72, 153, 0.1);
     color: var(--accent);
   }
+  
+  &.clients {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+  }
 `
 
 const StatValue = styled.div`
@@ -155,6 +161,11 @@ const SectionIcon = styled.div`
     background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
     color: white;
   }
+  
+  &.clients {
+    background: linear-gradient(135deg, #10B981 0%, #3B82F6 100%);
+    color: white;
+  }
 `
 
 const SectionTitle = styled.h3`
@@ -194,11 +205,14 @@ const AdminDashboard = () => {
   const { products } = useProduct()
   const { subscriptions } = useSubscription()
   const { reviews } = useReview()
+  const { clients, getClientsWithUpcomingPayments } = useClient()
   
   const featuredProducts = products.filter(product => product.featured).length
   const featuredSubscriptions = subscriptions.filter(subscription => subscription.featured).length
   const featuredReviews = reviews.filter(review => review.featured).length
   const totalFeatured = featuredProducts + featuredSubscriptions + featuredReviews
+  
+  const clientsWithUpcomingPayments = getClientsWithUpcomingPayments(10).length
   
   return (
     <div className="container">
@@ -206,7 +220,7 @@ const AdminDashboard = () => {
         <DashboardHeader>
           <DashboardTitle>Admin Dashboard</DashboardTitle>
           <DashboardSubtitle>
-            Manage your products, subscriptions, and reviews from one central location.
+            Manage your products, subscriptions, reviews, and clients from one central location.
           </DashboardSubtitle>
         </DashboardHeader>
         
@@ -286,6 +300,44 @@ const AdminDashboard = () => {
               </StatLink>
             </StatFooter>
           </StatCard>
+          
+          <StatCard 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5 }}
+          >
+            <StatHeader>
+              <StatTitle>Total Clients</StatTitle>
+              <StatIcon className="clients">
+                <FaUsers />
+              </StatIcon>
+            </StatHeader>
+            <StatValue>{clients.length}</StatValue>
+            <StatFooter>
+              <StatLink to="/admin/clients">
+                View all clients <FaChartLine size={14} />
+              </StatLink>
+            </StatFooter>
+          </StatCard>
+          
+          <StatCard 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.6 }}
+          >
+            <StatHeader>
+              <StatTitle>Upcoming Payments</StatTitle>
+              <StatIcon className="subscriptions">
+                <FaEnvelope />
+              </StatIcon>
+            </StatHeader>
+            <StatValue>{clientsWithUpcomingPayments}</StatValue>
+            <StatFooter>
+              <StatLink to="/admin/clients">
+                View payment reminders <FaChartLine size={14} />
+              </StatLink>
+            </StatFooter>
+          </StatCard>
         </StatsGrid>
         
         <SectionsGrid>
@@ -348,6 +400,27 @@ const AdminDashboard = () => {
               </SectionDescription>
               <SectionButton to="/admin/reviews">
                 <FaEdit /> Manage Reviews
+              </SectionButton>
+            </SectionBody>
+          </SectionCard>
+          
+          <SectionCard 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
+            <SectionHeader>
+              <SectionIcon className="clients">
+                <FaUsers />
+              </SectionIcon>
+              <SectionTitle>Clients</SectionTitle>
+            </SectionHeader>
+            <SectionBody>
+              <SectionDescription>
+                Manage your clients and their subscriptions. Track payment cycles, send payment reminders, and maintain client relationships.
+              </SectionDescription>
+              <SectionButton to="/admin/clients">
+                <FaEdit /> Manage Clients
               </SectionButton>
             </SectionBody>
           </SectionCard>
