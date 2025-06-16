@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, useState, useEffect, useContext } from 'react'
 
 export const SubscriptionContext = createContext()
 
@@ -114,4 +114,12 @@ export const SubscriptionProvider = ({ children }) => {
       {children}
     </SubscriptionContext.Provider>
   )
+}
+
+export const useSubscription = () => {
+  const context = useContext(SubscriptionContext)
+  if (context === undefined) {
+    throw new Error('useSubscription must be used within a SubscriptionProvider')
+  }
+  return context
 }

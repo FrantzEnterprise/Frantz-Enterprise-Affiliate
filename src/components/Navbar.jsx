@@ -262,6 +262,7 @@ const Navbar = () => {
             <NavItem to="/about">About</NavItem>
             <NavItem to="/products">Products</NavItem>
             <NavItem to="/subscriptions">Subscriptions</NavItem>
+            <NavItem to="/reviews">Reviews</NavItem>
             <NavItem to="/contact">Contact</NavItem>
           </NavLinks>
           
@@ -315,6 +316,7 @@ const Navbar = () => {
                 <MobileNavItem to="/about">About</MobileNavItem>
                 <MobileNavItem to="/products">Products</MobileNavItem>
                 <MobileNavItem to="/subscriptions">Subscriptions</MobileNavItem>
+                <MobileNavItem to="/reviews">Reviews</MobileNavItem>
                 <MobileNavItem to="/contact">Contact</MobileNavItem>
               </MobileNavLinks>
               
