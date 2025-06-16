@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { motion } from 'framer-motion'
 import { FaSave, FaArrowLeft, FaTrash, FaUpload } from 'react-icons/fa'
@@ -29,7 +29,7 @@ const Title = styled.h1`
   margin: 0;
 `
 
-const BackButton = styled.button`
+const BackButton = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -183,7 +183,9 @@ const ProductForm = () => {
     description: '',
     price: '',
     imageUrl: '',
-    affiliateLink: ''
+    affiliateLink: '',
+    category: '',
+    featured: false
   })
   
   const [errors, setErrors] = useState({})
@@ -198,7 +200,9 @@ const ProductForm = () => {
           description: product.description || '',
           price: product.price || '',
           imageUrl: product.imageUrl || '',
-          affiliateLink: product.affiliateLink || ''
+          affiliateLink: product.affiliateLink || '',
+          category: product.category || '',
+          featured: product.featured || false
         })
       } else {
         navigate('/admin/products')
@@ -207,10 +211,10 @@ const ProductForm = () => {
   }, [id, products, isEditMode, navigate])
   
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }))
     
     // Clear error when field is edited
@@ -237,6 +241,10 @@ const ProductForm = () => {
       newErrors.price = 'Price is required'
     } else if (isNaN(parseFloat(formData.price))) {
       newErrors.price = 'Price must be a valid number'
+    }
+    
+    if (!formData.category.trim()) {
+      newErrors.category = 'Category is required'
     }
     
     if (!formData.affiliateLink.trim()) {
@@ -313,7 +321,7 @@ const ProductForm = () => {
       <FormContainer>
         <FormHeader>
           <Title>{isEditMode ? 'Edit Product' : 'Add New Product'}</Title>
-          <BackButton onClick={() => navigate('/admin/products')}>
+          <BackButton to="/admin/products">
             <FaArrowLeft /> Back to Products
           </BackButton>
         </FormHeader>
@@ -342,6 +350,19 @@ const ProductForm = () => {
               placeholder="Enter product description"
             />
             {errors.description && <ErrorMessage>{errors.description}</ErrorMessage>}
+          </FormGroup>
+          
+          <FormGroup>
+            <Label htmlFor="category">Category</Label>
+            <Input
+              type="text"
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              placeholder="Enter product category"
+            />
+            {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
           </FormGroup>
           
           <FormGroup>
@@ -389,6 +410,18 @@ const ProductForm = () => {
                 <img src={formData.imageUrl} alt="Product preview" />
               </ImagePreview>
             )}
+          </FormGroup>
+          
+          <FormGroup>
+            <Label>
+              <Input
+                type="checkbox"
+                name="featured"
+                checked={formData.featured}
+                onChange={handleChange}
+              />
+              Featured Product
+            </Label>
           </FormGroup>
           
           {errors.form && <ErrorMessage>{errors.form}</ErrorMessage>}

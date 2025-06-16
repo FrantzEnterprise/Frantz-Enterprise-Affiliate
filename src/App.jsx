@@ -133,6 +133,31 @@ function App() {
                       </ProtectedRoute>
                     } />
                     
+                    {/* Add these new routes to fix 404 errors */}
+                    <Route path="/admin/products/new" element={
+                      <ProtectedRoute>
+                        <ProductForm />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/subscriptions/new" element={
+                      <ProtectedRoute>
+                        <SubscriptionForm />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/reviews/new" element={
+                      <ProtectedRoute>
+                        <ReviewForm />
+                      </ProtectedRoute>
+                    } />
+                    
+                    <Route path="/admin/clients/new" element={
+                      <ProtectedRoute>
+                        <AdminClientForm />
+                      </ProtectedRoute>
+                    } />
+                    
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </main>

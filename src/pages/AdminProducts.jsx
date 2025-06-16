@@ -376,7 +376,7 @@ const AdminProducts = () => {
         
         <PageHeader>
           <PageTitle>Manage Products</PageTitle>
-          <AddButton to="/admin/products/new">
+          <AddButton to="/admin/products/add">
             <FaPlus /> Add New Product
           </AddButton>
         </PageHeader>
@@ -444,7 +444,7 @@ const AdminProducts = () => {
                     </td>
                     <td>
                       <ActionButtons>
-                        <EditButton to={`/admin/products/${product.id}`}>
+                        <EditButton to={`/admin/products/edit/${product.id}`}>
                           <FaEdit />
                         </EditButton>
                         <DeleteButton onClick={() => handleDeleteClick(product)}>
