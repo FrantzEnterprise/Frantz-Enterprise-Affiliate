@@ -1,8 +1,8 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import styled from 'styled-components'
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaArrowLeft } from 'react-icons/fa'
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaFilter, FaArrowLeft, FaBug } from 'react-icons/fa'
 import { ProductContext } from '../context/ProductContext'
 
 const PageHeader = styled.div`
@@ -55,6 +55,47 @@ const AddButton = styled(Link)`
   @media (max-width: 768px) {
     width: 100%;
     justify-content: center;
+  }
+`
+
+const DebugButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--surface-light);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+`
+
+const DebugInfo = styled.div`
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  
+  h4 {
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+  }
+  
+  pre {
+    background-color: var(--surface-light);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
   }
 `
 
@@ -325,26 +366,70 @@ const DialogActions = styled.div`
 `
 
 const AdminProducts = () => {
-  const { products, deleteProduct } = useContext(ProductContext)
+  const { products, deleteProduct, debugProducts } = useContext(ProductContext)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [showDebug, setShowDebug] = useState(false)
   
-  // Extract unique categories
-  const categories = ['All', ...new Set(products.map(product => product.category))]
+  // Debug effect to log products when component mounts or products change
+  useEffect(() => {
+    console.log('AdminProducts - Products from context:', products)
+    console.log('AdminProducts - Products length:', products?.length)
+    console.log('AdminProducts - Products array:', JSON.stringify(products, null, 2))
+  }, [products])
   
-  // Filter products based on search, category, and featured status
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          product.description.toLowerCase().includes(searchTerm.toLowerCase())
+  // Ensure products is an array and has valid data
+  const safeProducts = Array.isArray(products) ? products : []
+  
+  // Extract unique categories with null checks
+  const categories = ['All', ...new Set(safeProducts
+    .filter(product => product && product.category)
+    .map(product => product.category)
+  )]
+  
+  // Filter products based on search, category, and featured status with proper null checks
+  const filteredProducts = safeProducts.filter(product => {
+    // Ensure product exists
+    if (!product) {
+      console.log('Filtering out null/undefined product')
+      return false
+    }
+    
+    // Allow products without title or description (they'll show as "Untitled" or "No description")
+    // Only filter out if both title AND description are missing
+    if (!product.title && !product.description) {
+      console.log('Filtering out product without title AND description:', product)
+      return false
+    }
+    
+    // Search functionality - handle missing title/description gracefully
+    const title = product.title || ''
+    const description = product.description || ''
+    const matchesSearch = !searchTerm || 
+                          title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          description.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesCategory = !selectedCategory || selectedCategory === 'All' || 
                             product.category === selectedCategory
     
     const matchesFeatured = !showFeaturedOnly || product.featured
     
-    return matchesSearch && matchesCategory && matchesFeatured
+    const passes = matchesSearch && matchesCategory && matchesFeatured
+    
+    if (!passes) {
+      console.log('Product filtered out:', product.title || product.id, {
+        matchesSearch,
+        matchesCategory,
+        matchesFeatured,
+        searchTerm,
+        selectedCategory,
+        showFeaturedOnly
+      })
+    }
+    
+    return passes
   })
   
   const handleDeleteClick = (product) => {
@@ -362,6 +447,11 @@ const AdminProducts = () => {
     setDeleteConfirm(null)
   }
   
+  const handleDebugClick = () => {
+    setShowDebug(!showDebug)
+    debugProducts()
+  }
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -376,10 +466,38 @@ const AdminProducts = () => {
         
         <PageHeader>
           <PageTitle>Manage Products</PageTitle>
-          <AddButton to="/admin/products/add">
-            <FaPlus /> Add New Product
-          </AddButton>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <DebugButton onClick={handleDebugClick}>
+              <FaBug /> Debug Info
+            </DebugButton>
+            <AddButton to="/admin/products/add">
+              <FaPlus /> Add New Product
+            </AddButton>
+          </div>
         </PageHeader>
+        
+        {showDebug && (
+          <DebugInfo>
+            <h4>Debug Information</h4>
+            <pre>
+              Total products in context: {safeProducts.length}{'\n'}
+              Filtered products: {filteredProducts.length}{'\n'}
+              Search term: "{searchTerm}"{'\n'}
+              Selected category: "{selectedCategory}"{'\n'}
+              Show featured only: {showFeaturedOnly.toString()}{'\n'}
+              {'\n'}
+              Products data:{'\n'}
+              {JSON.stringify(safeProducts.map(p => ({
+                id: p?.id,
+                title: p?.title,
+                category: p?.category,
+                featured: p?.featured,
+                hasDescription: !!p?.description,
+                hasImage: !!p?.image
+              })), null, 2)}
+            </pre>
+          </DebugInfo>
+        )}
         
         <FiltersContainer>
           <SearchContainer>
@@ -431,10 +549,10 @@ const AdminProducts = () => {
                 {filteredProducts.map(product => (
                   <tr key={product.id}>
                     <td>
-                      <ProductTitle>{product.title}</ProductTitle>
-                      <ProductCategory>{product.category}</ProductCategory>
+                      <ProductTitle>{product.title || 'Untitled Product'}</ProductTitle>
+                      <ProductCategory>{product.category || 'Uncategorized'}</ProductCategory>
                     </td>
-                    <td>{product.category}</td>
+                    <td>{product.category || 'Uncategorized'}</td>
                     <td>
                       {product.featured ? (
                         <FeaturedBadge>Featured</FeaturedBadge>
@@ -476,7 +594,7 @@ const AdminProducts = () => {
               transition={{ duration: 0.3 }}
             >
               <h3>Confirm Deletion</h3>
-              <p>Are you sure you want to delete "{deleteConfirm.title}"? This action cannot be undone.</p>
+              <p>Are you sure you want to delete "{deleteConfirm.title || 'this product'}"? This action cannot be undone.</p>
               <DialogActions>
                 <button className="cancel" onClick={cancelDelete}>Cancel</button>
                 <button className="confirm" onClick={confirmDelete}>Delete</button>

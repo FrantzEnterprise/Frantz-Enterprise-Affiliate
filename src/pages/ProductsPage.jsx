@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import styled from 'styled-components'
 import { ProductContext } from '../context/ProductContext'
 import ProductCard from '../components/ProductCard'
-import { FaSearch, FaFilter } from 'react-icons/fa'
+import { FaSearch, FaFilter, FaBug } from 'react-icons/fa'
 
 const PageHeader = styled.div`
   text-align: center;
@@ -26,6 +26,29 @@ const PageDescription = styled.p`
   color: var(--text-secondary);
   max-width: 700px;
   margin: 0 auto;
+`
+
+const DebugButton = styled.button`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  
+  &:hover {
+    background: var(--secondary);
+    transform: scale(1.1);
+  }
 `
 
 const FiltersContainer = styled.div`
@@ -106,6 +129,7 @@ const FilterButton = styled.button`
   &.active {
     background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
     border-color: transparent;
+    color: white;
   }
 `
 
@@ -124,6 +148,13 @@ const NoResults = styled.div`
   color: var(--text-secondary);
 `
 
+const ProductCount = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+`
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -135,13 +166,19 @@ const containerVariants = {
 }
 
 const ProductsPage = () => {
-  const { products } = useContext(ProductContext)
+  const { products, debugProducts } = useContext(ProductContext)
   const [filteredProducts, setFilteredProducts] = useState(products)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false)
   
   const location = useLocation()
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('ProductsPage - products from context:', products)
+    console.log('ProductsPage - products length:', products?.length)
+  }, [products])
   
   // Extract unique categories
   const categories = ['All', ...new Set(products.map(product => product.category))]
@@ -175,6 +212,7 @@ const ProductsPage = () => {
       results = results.filter(product => product.featured)
     }
     
+    console.log('Filtered products:', results)
     setFilteredProducts(results)
   }, [products, searchTerm, selectedCategory, showFeaturedOnly])
   
@@ -242,6 +280,10 @@ const ProductsPage = () => {
           </FiltersContainer>
         </motion.div>
         
+        <ProductCount>
+          Showing {filteredProducts.length} of {products.length} products
+        </ProductCount>
+        
         {filteredProducts.length > 0 ? (
           <motion.div
             variants={containerVariants}
@@ -261,6 +303,10 @@ const ProductsPage = () => {
           </NoResults>
         )}
       </div>
+      
+      <DebugButton onClick={debugProducts} title="Debug Products">
+        <FaBug />
+      </DebugButton>
     </motion.div>
   )
 }

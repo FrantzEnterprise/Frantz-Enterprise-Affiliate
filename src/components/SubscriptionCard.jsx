@@ -17,6 +17,10 @@ const CardImage = styled.div`
   height: 200px;
   overflow: hidden;
   position: relative;
+  background-color: var(--surface-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   img {
     width: 100%;
@@ -33,6 +37,26 @@ const CardImage = styled.div`
     right: 0;
     bottom: 0;
     background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(15, 23, 42, 0.8) 100%);
+  }
+`
+
+const ImagePlaceholder = styled.div`
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--surface-light) 0%, var(--surface) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  .icon {
+    font-size: 2rem;
+    opacity: 0.5;
   }
 `
 
@@ -154,6 +178,12 @@ const SubscriptionCard = ({ subscription }) => {
     }
   }
   
+  // Check if we have a valid image URL
+  const hasValidImage = subscription.image && (
+    subscription.image.startsWith('http') || 
+    subscription.image.startsWith('data:')
+  )
+  
   return (
     <Card 
       variants={cardVariants}
@@ -165,11 +195,19 @@ const SubscriptionCard = ({ subscription }) => {
       {subscription.category && <CategoryBadge>{subscription.category}</CategoryBadge>}
       
       <CardImage>
-        <motion.img 
-          src={subscription.image} 
-          alt={subscription.title}
-          whileHover={{ scale: 1.05 }}
-        />
+        {hasValidImage ? (
+          <motion.img 
+            src={subscription.image} 
+            alt={subscription.title}
+            whileHover={{ scale: 1.05 }}
+          />
+        ) : (
+          <ImagePlaceholder>
+            <div className="icon">📷</div>
+            <div>No image available</div>
+            <small>{subscription.title || 'Untitled Subscription'}</small>
+          </ImagePlaceholder>
+        )}
       </CardImage>
       
       <CardContent>

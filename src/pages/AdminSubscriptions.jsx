@@ -305,4 +305,255 @@ const NoResults = styled.div`
 
 const ConfirmDialog = styled(motion.div)`
   position: fixed;
-  top: 
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--surface);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  min-width: 400px;
+  
+  @media (max-width: 768px) {
+    min-width: 90vw;
+    margin: 1rem;
+  }
+`
+
+const DialogOverlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+`
+
+const DialogTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1rem;
+`
+
+const DialogMessage = styled.p`
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+`
+
+const DialogActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+`
+
+const CancelButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  background-color: var(--surface-light);
+  border: 1px solid var(--surface-light);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: var(--surface);
+  }
+`
+
+const ConfirmButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  background-color: var(--error);
+  border: 1px solid var(--error);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: #dc2626;
+  }
+`
+
+const AdminSubscriptions = () => {
+  const { subscriptions, deleteSubscription } = useContext(SubscriptionContext)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [availabilityFilter, setAvailabilityFilter] = useState('all')
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [subscriptionToDelete, setSubscriptionToDelete] = useState(null)
+
+  const handleDeleteClick = (subscription) => {
+    setSubscriptionToDelete(subscription)
+    setShowConfirmDialog(true)
+  }
+
+  const handleConfirmDelete = () => {
+    if (subscriptionToDelete) {
+      deleteSubscription(subscriptionToDelete.id)
+      setShowConfirmDialog(false)
+      setSubscriptionToDelete(null)
+    }
+  }
+
+  const handleCancelDelete = () => {
+    setShowConfirmDialog(false)
+    setSubscriptionToDelete(null)
+  }
+
+  const filteredSubscriptions = subscriptions.filter(subscription => {
+    const matchesSearch = subscription.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         subscription.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = categoryFilter === 'all' || subscription.category === categoryFilter
+    const matchesAvailability = availabilityFilter === 'all' || subscription.availability === availabilityFilter
+    
+    return matchesSearch && matchesCategory && matchesAvailability
+  })
+
+  const categories = [...new Set(subscriptions.map(sub => sub.category))]
+
+  return (
+    <div>
+      <BackLink to="/admin">
+        <FaArrowLeft />
+        Back to Admin Dashboard
+      </BackLink>
+
+      <PageHeader>
+        <PageTitle>Manage Subscriptions</PageTitle>
+        <AddButton to="/admin/subscriptions/new">
+          <FaPlus />
+          Add New Subscription
+        </AddButton>
+      </PageHeader>
+
+      <FiltersContainer>
+        <SearchContainer>
+          <SearchIcon>
+            <FaSearch />
+          </SearchIcon>
+          <SearchInput
+            type="text"
+            placeholder="Search subscriptions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </SearchContainer>
+
+        <CategoryFilter
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+        >
+          <option value="all">All Categories</option>
+          {categories.map(category => (
+            <option key={category} value={category}>{category}</option>
+          ))}
+        </CategoryFilter>
+
+        <AvailabilityFilter
+          value={availabilityFilter}
+          onChange={(e) => setAvailabilityFilter(e.target.value)}
+        >
+          <option value="all">All Availability</option>
+          <option value="open">Open</option>
+          <option value="limited">Limited</option>
+          <option value="filled">Filled</option>
+        </AvailabilityFilter>
+      </FiltersContainer>
+
+      {filteredSubscriptions.length > 0 ? (
+        <SubscriptionTable>
+          <Table>
+            <TableHead>
+              <tr>
+                <th>Subscription</th>
+                <th>Price</th>
+                <th>Featured</th>
+                <th>Availability</th>
+                <th>Actions</th>
+              </tr>
+            </TableHead>
+            <TableBody>
+              {filteredSubscriptions.map(subscription => (
+                <motion.tr
+                  key={subscription.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <td>
+                    <SubscriptionTitle>{subscription.title}</SubscriptionTitle>
+                    <SubscriptionCategory>{subscription.category}</SubscriptionCategory>
+                  </td>
+                  <td>
+                    <SubscriptionPrice>${subscription.price}/month</SubscriptionPrice>
+                  </td>
+                  <td>
+                    {subscription.featured ? (
+                      <FeaturedBadge>Featured</FeaturedBadge>
+                    ) : (
+                      <NotFeaturedBadge>Not Featured</NotFeaturedBadge>
+                    )}
+                  </td>
+                  <td>
+                    <AvailabilityBadge className={subscription.availability}>
+                      {subscription.availability.charAt(0).toUpperCase() + subscription.availability.slice(1)}
+                    </AvailabilityBadge>
+                  </td>
+                  <td>
+                    <ActionButtons>
+                      <EditButton to={`/admin/subscriptions/edit/${subscription.id}`}>
+                        <FaEdit />
+                      </EditButton>
+                      <DeleteButton onClick={() => handleDeleteClick(subscription)}>
+                        <FaTrash />
+                      </DeleteButton>
+                    </ActionButtons>
+                  </td>
+                </motion.tr>
+              ))}
+            </TableBody>
+          </Table>
+        </SubscriptionTable>
+      ) : (
+        <NoResults>
+          <h3>No subscriptions found</h3>
+          <p>Try adjusting your search or filter criteria.</p>
+        </NoResults>
+      )}
+
+      {showConfirmDialog && (
+        <>
+          <DialogOverlay
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCancelDelete}
+          />
+          <ConfirmDialog
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+          >
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogMessage>
+              Are you sure you want to delete "{subscriptionToDelete?.title}"? This action cannot be undone.
+            </DialogMessage>
+            <DialogActions>
+              <CancelButton onClick={handleCancelDelete}>
+                Cancel
+              </CancelButton>
+              <ConfirmButton onClick={handleConfirmDelete}>
+                Delete
+              </ConfirmButton>
+            </DialogActions>
+          </ConfirmDialog>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default AdminSubscriptions
