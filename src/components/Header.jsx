@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FaBars, FaTimes, FaUser } from 'react-icons/fa'
+import { FaBars, FaTimes, FaUser, FaYoutube } from 'react-icons/fa'
 import styled from 'styled-components'
 import { AuthContext } from '../context/AuthContext'
 
@@ -118,6 +118,73 @@ const CloseButton = styled.button`
   }
 `
 
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+`
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+`
+
+const UserAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+`
+
+const UserName = styled.span`
+  font-weight: 500;
+  color: var(--text);
+  font-size: 0.875rem;
+`
+
+const YouTubeButton = styled.a`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);
+  border-radius: 50%;
+  color: white;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+`
+
 const AdminButton = styled(Link)`
   display: flex;
   align-items: center;
@@ -136,6 +203,31 @@ const AdminButton = styled(Link)`
   }
 `
 
+const MobileUserSection = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    display: flex;
+  }
+`
+
+const MobileUserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+`
+
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { isAuthenticated } = useContext(AuthContext)
@@ -148,6 +240,9 @@ const Header = () => {
   const closeMenu = () => {
     setIsMenuOpen(false)
   }
+
+  // YouTube channel URL - replace with your actual channel URL
+  const youtubeChannelUrl = "https://www.youtube.com/@FrantzEnterprise"
 
   return (
     <HeaderContainer>
@@ -173,6 +268,23 @@ const Header = () => {
             <NavLink to="/about" onClick={closeMenu}>About</NavLink>
             <NavLink to="/contact" onClick={closeMenu}>Contact</NavLink>
             
+            {/* Mobile User Section */}
+            <MobileUserSection>
+              <MobileUserInfo>
+                <UserAvatar>RF</UserAvatar>
+                <UserName>Robert Frantz</UserName>
+              </MobileUserInfo>
+              
+              <YouTubeButton 
+                href={youtubeChannelUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Visit YouTube Channel"
+              >
+                <FaYoutube />
+              </YouTubeButton>
+            </MobileUserSection>
+            
             {isAuthenticated ? (
               <AdminButton to="/admin" onClick={closeMenu}>
                 <FaUser />
@@ -185,6 +297,23 @@ const Header = () => {
               </AdminButton>
             )}
           </NavLinks>
+
+          {/* Desktop User Section */}
+          <UserSection>
+            <UserInfo>
+              <UserAvatar>RF</UserAvatar>
+              <UserName>Robert Frantz</UserName>
+            </UserInfo>
+            
+            <YouTubeButton 
+              href={youtubeChannelUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Visit YouTube Channel"
+            >
+              <FaYoutube />
+            </YouTubeButton>
+          </UserSection>
         </Nav>
       </div>
     </HeaderContainer>

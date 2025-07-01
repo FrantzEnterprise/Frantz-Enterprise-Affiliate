@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import styled from 'styled-components'
-import { FaSearch, FaFilter, FaStar, FaCalendarAlt, FaTags, FaYoutube } from 'react-icons/fa'
+import { FaSearch, FaFilter, FaStar, FaCalendarAlt, FaTags, FaUser, FaChevronDown, FaChevronUp, FaUpload } from 'react-icons/fa'
 import { useReview } from '../context/ReviewContext'
+import { getProxiedImageUrl } from '../utils/imageProxy'
 
 const PageHeader = styled.div`
   text-align: center;
@@ -111,13 +111,9 @@ const FilterButton = styled.button`
 
 const ReviewsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr;
+  gap: 3rem;
   margin-bottom: 4rem;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 `
 
 const ReviewCard = styled(motion.div)`
@@ -125,9 +121,7 @@ const ReviewCard = styled(motion.div)`
   border-radius: 0.75rem;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   
   &:hover {
     transform: translateY(-5px);
@@ -137,46 +131,71 @@ const ReviewCard = styled(motion.div)`
 
 const ReviewCardHeader = styled.div`
   position: relative;
+  display: flex;
+  align-items: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--surface-light) 0%, var(--surface) 100%);
 `
 
-const VideoThumbnail = styled.div`
+const AvatarContainer = styled.div`
   position: relative;
-  padding-top: 56.25%; /* 16:9 aspect ratio */
-  background-color: var(--surface-light);
-  overflow: hidden;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(0deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0) 50%);
-    z-index: 1;
-  }
+  margin-right: 1.5rem;
+  flex-shrink: 0;
 `
 
-const VideoIcon = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+const Avatar = styled.div`
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  z-index: 2;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease;
   
   ${ReviewCard}:hover & {
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: scale(1.05);
   }
+`
+
+const AvatarImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+`
+
+const AvatarPlaceholder = styled.div`
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+`
+
+const ReviewerInfo = styled.div`
+  flex: 1;
+`
+
+const ReviewerName = styled.h3`
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+`
+
+const ReviewerTitle = styled.p`
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+`
+
+const ReviewDate = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
 `
 
 const FeaturedBadge = styled.div`
@@ -193,78 +212,116 @@ const FeaturedBadge = styled.div`
 `
 
 const ReviewCardBody = styled.div`
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  padding: 2rem;
 `
 
-const ReviewTitle = styled.h3`
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
+const ReviewTitle = styled.h2`
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
 `
 
 const ProductName = styled.div`
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 `
 
 const Rating = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #F59E0B;
 `
 
-const ReviewExcerpt = styled.p`
+const ReviewContent = styled.div`
+  color: var(--text);
+  line-height: 1.7;
+  font-size: 1.125rem;
+  
+  h3 {
+    font-size: 1.375rem;
+    margin: 2rem 0 1rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+  }
+  
+  ul, ol {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  blockquote {
+    border-left: 4px solid var(--primary);
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: var(--text-secondary);
+    background-color: var(--surface-light);
+    padding: 1rem 1rem 1rem 2rem;
+    border-radius: 0 0.375rem 0.375rem 0;
+  }
+`
+
+const ReviewExcerpt = styled.div`
   color: var(--text-secondary);
   margin-bottom: 1.5rem;
   line-height: 1.6;
-  flex: 1;
+  font-size: 1rem;
+`
+
+const ExpandButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  border: none;
+  border-radius: 0.375rem;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  
+  &:hover {
+    background-position: 100% 0%;
+    transform: translateY(-2px);
+  }
 `
 
 const ReviewMeta = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 1rem;
+  padding-top: 1.5rem;
   border-top: 1px solid var(--surface-light);
   font-size: 0.875rem;
   color: var(--text-secondary);
-`
-
-const ReviewDate = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 `
 
 const ReviewTags = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-`
-
-const ReadMoreButton = styled(Link)`
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-  background-size: 200% 100%;
-  background-position: 0% 0%;
-  border-radius: 0.375rem;
-  color: white;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-  
-  &:hover {
-    background-position: 100% 0%;
-    transform: translateY(-2px);
-  }
 `
 
 const NoResults = styled.div`
@@ -280,6 +337,7 @@ const ReviewsPage = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(false)
+  const [expandedReviews, setExpandedReviews] = useState(new Set())
   
   const categories = [...new Set(reviews.map(review => review.category))]
   
@@ -297,13 +355,42 @@ const ReviewsPage = () => {
     setShowFeaturedOnly(!showFeaturedOnly)
   }
   
-  const getExcerpt = (content, maxLength = 150) => {
+  const toggleReviewExpansion = (reviewId) => {
+    const newExpanded = new Set(expandedReviews)
+    if (newExpanded.has(reviewId)) {
+      newExpanded.delete(reviewId)
+    } else {
+      newExpanded.add(reviewId)
+    }
+    setExpandedReviews(newExpanded)
+  }
+  
+  const getExcerpt = (content, maxLength = 200) => {
     // Remove HTML tags
-    const plainText = content.replace(/<[^>]+>/g, ' ')
+    const plainText = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
     
     if (plainText.length <= maxLength) return plainText
     
     return plainText.substring(0, maxLength).trim() + '...'
+  }
+  
+  const isExpanded = (reviewId) => expandedReviews.has(reviewId)
+  
+  const getAvatarUrl = (review) => {
+    // Try custom avatar first, then site URL favicon, then placeholder
+    if (review.avatarUrl) {
+      return getProxiedImageUrl(review.avatarUrl)
+    }
+    
+    if (review.siteUrl) {
+      return getProxiedImageUrl(`${review.siteUrl}/favicon.ico`)
+    }
+    
+    return null
+  }
+  
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   }
   
   return (
@@ -358,11 +445,32 @@ const ReviewsPage = () => {
               transition={{ duration: 0.5 }}
             >
               <ReviewCardHeader>
-                <VideoThumbnail>
-                  <VideoIcon>
-                    <FaYoutube />
-                  </VideoIcon>
-                </VideoThumbnail>
+                <AvatarContainer>
+                  <Avatar>
+                    {getAvatarUrl(review) ? (
+                      <AvatarImage 
+                        src={getAvatarUrl(review)}
+                        alt={review.author}
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.nextSibling.style.display = 'flex'
+                        }}
+                      />
+                    ) : null}
+                    <AvatarPlaceholder style={{ display: getAvatarUrl(review) ? 'none' : 'flex' }}>
+                      {getInitials(review.author)}
+                    </AvatarPlaceholder>
+                  </Avatar>
+                </AvatarContainer>
+                
+                <ReviewerInfo>
+                  <ReviewerName>{review.author}</ReviewerName>
+                  <ReviewerTitle>Product Reviewer & Tech Analyst</ReviewerTitle>
+                  <ReviewDate>
+                    <FaCalendarAlt /> {review.date}
+                  </ReviewDate>
+                </ReviewerInfo>
+                
                 {review.featured && (
                   <FeaturedBadge>Featured</FeaturedBadge>
                 )}
@@ -370,7 +478,7 @@ const ReviewsPage = () => {
               
               <ReviewCardBody>
                 <ReviewTitle>{review.title}</ReviewTitle>
-                <ProductName>{review.productName}</ProductName>
+                <ProductName>Review of: {review.productName}</ProductName>
                 
                 <Rating>
                   {[...Array(5)].map((_, i) => (
@@ -379,18 +487,27 @@ const ReviewsPage = () => {
                   <span style={{ marginLeft: '0.5rem', color: 'var(--text)' }}>{review.rating.toFixed(1)}</span>
                 </Rating>
                 
-                <ReviewExcerpt>
-                  {getExcerpt(review.content)}
-                </ReviewExcerpt>
+                {!isExpanded(review.id) ? (
+                  <ReviewExcerpt>
+                    {getExcerpt(review.content)}
+                  </ReviewExcerpt>
+                ) : (
+                  <ReviewContent dangerouslySetInnerHTML={{ __html: review.content }} />
+                )}
                 
-                <ReadMoreButton to={`/reviews/${review.id}`}>
-                  Read Full Review
-                </ReadMoreButton>
+                <ExpandButton onClick={() => toggleReviewExpansion(review.id)}>
+                  {isExpanded(review.id) ? (
+                    <>
+                      <FaChevronUp /> Show Less
+                    </>
+                  ) : (
+                    <>
+                      <FaChevronDown /> Read Full Review
+                    </>
+                  )}
+                </ExpandButton>
                 
                 <ReviewMeta>
-                  <ReviewDate>
-                    <FaCalendarAlt /> {review.date}
-                  </ReviewDate>
                   <ReviewTags>
                     <FaTags /> {review.category}
                   </ReviewTags>

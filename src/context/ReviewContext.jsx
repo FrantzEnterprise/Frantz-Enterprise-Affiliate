@@ -8,7 +8,8 @@ const initialReviews = [
     title: 'Why This Email Marketing Tool Changed My Business',
     productName: 'Premium Email Marketing Software',
     rating: 4.8,
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    avatarUrl: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+    siteUrl: 'https://frantzenterprise.com',
     content: `
       <p>After trying numerous email marketing platforms over the years, I've finally found one that truly delivers on its promises. This tool has completely transformed how I approach email campaigns.</p>
       
@@ -35,7 +36,8 @@ const initialReviews = [
     title: 'This AI Content Creator Saves Me 10+ Hours Every Week',
     productName: 'AI-Powered Content Creator',
     rating: 4.5,
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    avatarUrl: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+    siteUrl: 'https://frantzenterprise.com',
     content: `
       <p>Content creation has always been a time-consuming process for my business. Between blog posts, social media updates, and email newsletters, I was spending 15+ hours weekly just writing. This AI tool has given me back that time while maintaining quality.</p>
       
@@ -65,7 +67,8 @@ const initialReviews = [
     title: 'Honest Review: All-in-One SEO Toolkit After 6 Months',
     productName: 'All-in-One SEO Toolkit',
     rating: 4.2,
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    avatarUrl: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&fit=crop&crop=face',
+    siteUrl: 'https://frantzenterprise.com',
     content: `
       <p>I've been using this SEO toolkit for the past 6 months, and it's time to share my honest assessment. Is it worth the investment? Here's my experience.</p>
       
